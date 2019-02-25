@@ -1,0 +1,49 @@
+* {
+    margin: 0px;
+    padding: 0px;
+    font-family: cursive;
+}
+
+#canvas-wrapper {
+    position: relative;
+    float: left;
+    margin: 1%;
+    width: 900px;
+    height: 700px;
+    border: solid 1px;
+}
+
+.canvas {
+    position: absolute;
+    width: inherit;
+    height: inherit;
+}
+
+#panel {
+    position: relative;
+    float: left;
+    margin: 3%;
+    border: solid 1px;
+    width: 300px;
+    height: 400px;
+    text-align: center;
+}
+
+#player-turn {
+    display: inline-block;
+    padding: 5px;
+    text-decoration: underline;
+    margin: 5px;
+}
+
+#l {
+    width: 95%;
+    margin: 2.5%;
+}
+
+#action {
+    position: relative;
+    width: inherit;
+    height: inherit;
+    margin: 5px;
+}
