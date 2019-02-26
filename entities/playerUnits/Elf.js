@@ -2,6 +2,8 @@ var Elf = {};
 
 Elf = Object.create(Character);
 
+Elf.name = 'Elf';
+
 Elf.attack = 5;
 
 Elf.armor = 1;

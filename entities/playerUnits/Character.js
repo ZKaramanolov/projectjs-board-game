@@ -1,5 +1,7 @@
 var Character = {};
 
+Character.name = undefined;
+
 Character.side = undefined;
 
 Character.attack = undefined;
