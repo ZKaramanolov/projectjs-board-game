@@ -31,6 +31,13 @@ CanvasManager.displayBoard = () => {
                 ctx.arc(rendX + size / 2, rendY + size / 2, 40, 0, 2 * Math.PI);
                 ctx.fill();
             }
+
+            if (board[i][j].isVisited) {
+                ctx.fillStyle = '#4af99e';
+                ctx.beginPath();
+                ctx.arc(rendX + size / 2, rendY + size / 2, 40, 0, 2 * Math.PI);
+                ctx.fill();
+            }
         }
     }
 
@@ -82,11 +89,11 @@ CanvasManager.AllowedFieldsForPlacement = (player) => {
                 ctx.fillStyle = '#db3204';
                 ctx.fillRect(rendX, rendY, board[i][j].size, board[i][j].size);
                 ctx.rect(rendX, rendY, board[i][j].size, board[i][j].size);
-                ctx.stroke();
                 ctx.fillStyle = 'black';
                 ctx.textAlign = "center";
                 ctx.font = '35px Arial red';
                 ctx.fillText('X', rendX + 50, rendY + 60);
+                ctx.stroke();
             }
         }
     }

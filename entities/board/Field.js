@@ -14,4 +14,12 @@ Field.y = undefined;
 
 Field.size = 100;
 
-Board.isSelected = false;
+Field.isSelected = false;
+
+Field.isEmpty = true;
+
+Field.isVisited = false;
+
+Field.isTested = false;
+
+Field.dis = 0;

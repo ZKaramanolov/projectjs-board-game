@@ -140,9 +140,9 @@ GameManager.fightingCharacterPhase = () => {
     actions.innerHTML = '';
 
     var placingChars = `
-        <div class="char-button" onclick="GameManager.attack()"> Attack </div>
-        <div class="char-button" onclick="GameManager.move()"> Move </div>
-        <div class="char-button" onclick="GameManager.heal()"> Heal </div>
+        <div class="char-button" onclick="GameManager.setAttack()"> Attack </div>
+        <div class="char-button" onclick="GameManager.setMove()"> Move </div>
+        <div class="char-button" onclick="GameManager.setHeal()"> Heal </div>
     `;
 
     actions.innerHTML += placingChars;
@@ -212,20 +212,12 @@ GameManager.addCharacterToGame = (player) => {
     selChar.y = Math.floor(GameManager.lastPlayerY / 100);
     player.characters.push(selChar);
     GameManager.selectedCharacter = undefined;
+    Board.board[indexes[0]][indexes[1]].isEmpty = false;
 
     CanvasManager.display();
 
     //changing the turn to other player
-    var playerTurnLabel = document.getElementById('player-turn');
-    if (player.name == 'Player A') {
-        GameManager.playerOnTurn = GameManager.playerB;
-        playerTurnLabel.innerHTML = GameManager.playerOnTurn.name;
-        GameManager.turnCount++;
-    } else {
-        GameManager.playerOnTurn = GameManager.playerA;
-        playerTurnLabel.innerHTML = GameManager.playerOnTurn.name;
-        GameManager.turnCount++;
-    }
+    GameManager.chengeTurns();
 
     //cheking for ending of placing phase
     if (GameManager.playerA.characters.length == 6 && GameManager.playerB.characters.length == 6) {
@@ -235,17 +227,34 @@ GameManager.addCharacterToGame = (player) => {
 };
 
 GameManager.fightCharacter = () => {
-    if (GameManager.selectedAction != undefined) {
-        
+    var action = GameManager.selectedAction
+
+    if (action != undefined) {
         var indexes = GameManager.getIndexesOfClickedField();
         var chars = GameManager.playerOnTurn.characters;
 
         for (var i = 0; i < chars.length; i++) {
             if (chars[i].x == indexes[1] && chars[i].y == indexes[0]) {
                 Board.board[indexes[0]][indexes[1]].isSelected = true;
+                GameManager.selectedCharacter = chars[i];
                 CanvasManager.display();
             }
         }
+
+        if (GameManager.selectedCharacter == undefined) {
+            alert('Can not select enemy units!');
+            return;
+        }
+
+        if (action == 'heal') {
+            GameManager.heal();
+        }
+        if (action == 'attack') {
+            GameManager.attack();
+        } else if (action == 'move') {
+            GameManager.move();
+        }
+
     } else {
         alert("Must select action first!");
     }
@@ -281,20 +290,157 @@ GameManager.E = () => {
     GameManager.selectedCharacter = tempChar;
     CanvasManager.AllowedFieldsForPlacement(GameManager.playerOnTurn.name);
 };
+
 GameManager.D = () => {
     var tempChar = Object.create(Dwarf);
     GameManager.selectedCharacter = tempChar;
     CanvasManager.AllowedFieldsForPlacement(GameManager.playerOnTurn.name);
 };
 
-GameManager.attack = () => {
+GameManager.setAttack = () => {
     GameManager.selectedAction = 'attack';
 };
 
-GameManager.move = () => {
+GameManager.setMove = () => {
     GameManager.selectedAction = 'move';
 };
 
-GameManager.heal = () => {
+GameManager.setHeal = () => {
     GameManager.selectedAction = 'heal';
+};
+
+GameManager.attack = () => {
+
+};
+
+GameManager.move = () => {
+    GameManager.possibleMovements();
+};
+
+GameManager.possibleMovements = () => {
+    var indexes = GameManager.getIndexesOfClickedField();
+    var rangeOfMovement = GameManager.selectedCharacter.speed;
+    var board = Board.board;
+    var node = [];
+
+    node.push(board[indexes[0]][indexes[1]]);
+
+    var enter = 1;
+
+    while (node.length > 0) {
+        var temp = node.pop();
+
+        temp.isVisited = true;
+        console.log(temp.dis);
+
+        if (rangeOfMovement <= temp.dis) {
+            continue;
+        }
+
+        if (temp.x - 1 >= 0 &&
+            board[temp.y][temp.x - 1].rock == undefined &&
+            board[temp.y][temp.x - 1].isEmpty &&
+            !board[temp.y][temp.x - 1].isVisited) {
+
+            if (!board[temp.y][temp.x - 1].isTested) {
+                board[temp.y][temp.x - 1].dis = temp.dis + 1;
+            }
+
+            node.push(board[temp.y][temp.x - 1]);
+            board[temp.y][temp.x - 1].isTested = true;
+        }
+        if (temp.x + 1 < board[0].length &&
+            board[temp.y][temp.x + 1].rock == undefined &&
+            board[temp.y][temp.x + 1].isEmpty &&
+            !board[temp.y][temp.x + 1].isVisited) {
+
+            if (!board[temp.y][temp.x + 1].isTested) {
+                board[temp.y][temp.x + 1].dis = temp.dis + 1;
+            }
+
+            node.push(board[temp.y][temp.x + 1]);
+            board[temp.y][temp.x + 1].isTested = true;
+        }
+        if (temp.y - 1 >= 0 &&
+            board[temp.y - 1][temp.x].rock == undefined &&
+            board[temp.y - 1][temp.x].isEmpty &&
+            !board[temp.y - 1][temp.x].isVisited) {
+
+            if (!board[temp.y - 1][temp.x].isTested) {
+                board[temp.y - 1][temp.x].dis = temp.dis + 1;
+            }
+
+            node.push(board[temp.y - 1][temp.x]);
+            board[temp.y - 1][temp.x].isTested = true;
+        }
+        if (temp.y + 1 < board.length &&
+            board[temp.y + 1][temp.x].rock == undefined &&
+            board[temp.y + 1][temp.x].isEmpty &&
+            !board[temp.y + 1][temp.x].isVisited) {
+
+            if (!board[temp.y + 1][temp.x].isTested) {
+                board[temp.y + 1][temp.x].dis = temp.dis + 1;
+            }
+
+            node.push(board[temp.y + 1][temp.x]);
+            board[temp.y + 1][temp.x].isTested = true;
+        }
+
+    }
+    CanvasManager.display();
+};
+
+GameManager.heal = () => {
+    var numOfHeal = GameManager.rollDices(1);
+
+    GameManager.selectedCharacter.health += numOfHeal[0];
+
+    var secondAction = GameManager.rollDices(1);
+
+    if (secondAction % 2 == 0) {
+        GameManager.clearSelected();
+        GameManager.chengeTurns();
+    } else {
+        GameManager.clearSelected();
+    }
+};
+
+GameManager.clearSelected = () => {
+    GameManager.selectedAction = undefined;
+    GameManager.selectedCharacter = undefined;
+
+   var indexes = GameManager.getIndexesOfClickedField();
+
+   Board.board[indexes[0]][indexes[1]].isSelected = false;
+
+    // for (var i = 0; i < Board.board.length; i++) {
+    //     for (var j = 0; j < Board.board[i].length; j++) {
+    //         Board.board[i][j].isSelected = false;
+    //     }
+    // }
+
+    CanvasManager.display();
+};
+
+GameManager.chengeTurns = () => {
+    var playerTurnLabel = document.getElementById('player-turn');
+    if (GameManager.playerOnTurn.name == 'Player A') {
+        GameManager.playerOnTurn = GameManager.playerB;
+        playerTurnLabel.innerHTML = GameManager.playerOnTurn.name;
+        GameManager.turnCount++;
+    } else {
+        GameManager.playerOnTurn = GameManager.playerA;
+        playerTurnLabel.innerHTML = GameManager.playerOnTurn.name;
+        GameManager.turnCount++;
+    }
+};
+
+GameManager.rollDices = (numberOfDices) => {
+    var dices = [];
+
+    for (var i = 0; i < numberOfDices; i++) {
+        var rand = Math.floor(Math.random() * 6) + 1;
+        dices.push(rand);
+    }
+    return dices;
 };
