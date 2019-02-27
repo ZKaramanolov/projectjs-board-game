@@ -6,9 +6,9 @@ GameManager.lastPlayerY = undefined;
 
 GameManager.turnCount = 0;
 
-GameManager.playerOnTurn = 'Player A';
-
 GameManager.selectedCharacter = undefined;
+
+GameManager.selectedAction = undefined;
 
 GameManager.gamePhase = 'Initializing';
 
@@ -21,6 +21,8 @@ GameManager.playerB = {
     name : 'Player B',
     characters : [],
 };
+
+GameManager.playerOnTurn = GameManager.playerA;
 
 GameManager.init = () => {
     GameManager.generateBoard();
@@ -105,9 +107,11 @@ GameManager.generateRocks = () => {
 
 GameManager.startGame = () => {
 
-    GameManager.placingCharactersPhase();
-    // GameManager.fightPhase();
-    // GameManager.endPhase();
+    if (GameManager.gamePhase == 'Initializing') {
+        GameManager.placingCharactersPhase();
+    } else if (GameManager.gamePhase == 'Fighting') {
+        GameManager.fightingCharacterPhase();
+    }
 
 };
 
@@ -119,17 +123,29 @@ GameManager.placingCharactersPhase = () => {
     var actions = document.getElementById('actions');
     actions.innerHTML = '';
 
-    playerTurnLabel.innerHTML = GameManager.playerOnTurn;
-
     var placingChars = `
-        <div class="char-button" onclick="GameManager.K()"> K </div>
-        <div class="char-button" onclick="GameManager.E()"> E </div>
-        <div class="char-button" onclick="GameManager.D()"> D </div>
+        <div class="char-button" onclick="GameManager.K()"> Knight </div>
+        <div class="char-button" onclick="GameManager.E()"> Elf </div>
+        <div class="char-button" onclick="GameManager.D()"> Dwarf </div>
     `;
 
     actions.innerHTML += placingChars;
 
     CanvasManager.onClick();
+};
+
+GameManager.fightingCharacterPhase = () => {
+    var playerTurnLabel = document.getElementById('player-turn');
+    var actions = document.getElementById('actions');
+    actions.innerHTML = '';
+
+    var placingChars = `
+        <div class="char-button" onclick="GameManager.attack()"> Attack </div>
+        <div class="char-button" onclick="GameManager.move()"> Move </div>
+        <div class="char-button" onclick="GameManager.heal()"> Heal </div>
+    `;
+
+    actions.innerHTML += placingChars;
 };
 
 GameManager.canvasIsClicked = (clientX, clientY) => {
@@ -141,19 +157,19 @@ GameManager.canvasIsClicked = (clientX, clientY) => {
 
         GameManager.placeCharacter();
 
+    } else if (GameManager.gamePhase == 'Fighting') {
+
+        GameManager.fightCharacter();
+
     }
 };
 
 GameManager.placeCharacter = () => {
     if (GameManager.selectedCharacter != undefined) {
-        if (GameManager.playerOnTurn == 'Player A') {
-
+        if (GameManager.playerOnTurn.name == 'Player A') {
             GameManager.addCharacterToGame(GameManager.playerA);
-
         } else {
-
             GameManager.addCharacterToGame(GameManager.playerB);
-
         }
     } else {
         alert("Must select character to place!");
@@ -162,21 +178,80 @@ GameManager.placeCharacter = () => {
 };
 
 GameManager.addCharacterToGame = (player) => {
+    var selChar = Object.create(GameManager.selectedCharacter);
 
-    //checking count of character of that type
+    //checking the count of character of that type and if there is characters in the field
     var count = 0;
     for (var i = 0; i < player.characters.length; i++) {
-        if (GameManager.selectedCharacter.name == player.characters[i].name) {
+        if (selChar.name == player.characters[i].name) {
             count++;
+        }
+
+        if (player.characters[i].x == Math.floor(GameManager.lastPlayerX / 100) &&
+            player.characters[i].y == Math.floor(GameManager.lastPlayerY / 100)) {
+            alert("Can't place 2 characters on the same field!");
+            return;
         }
     }
 
     if (count >= 2) {
-        alert("Already have 2 " + GameManager.selectedCharacter.name);
+        alert("Already have 2 " + selChar.name);
         return;
     }
 
     //checking if character can be placed on that field
+    var indexes = GameManager.getIndexesOfClickedField();
+    if (Board.board[indexes[0]][indexes[1]].side != player.name) {
+        alert("Can not place here!");
+        return;
+    }
+
+    //adding character to his player squad
+    selChar.side = player.name;
+    selChar.x = Math.floor(GameManager.lastPlayerX / 100);
+    selChar.y = Math.floor(GameManager.lastPlayerY / 100);
+    player.characters.push(selChar);
+    GameManager.selectedCharacter = undefined;
+
+    CanvasManager.display();
+
+    //changing the turn to other player
+    var playerTurnLabel = document.getElementById('player-turn');
+    if (player.name == 'Player A') {
+        GameManager.playerOnTurn = GameManager.playerB;
+        playerTurnLabel.innerHTML = GameManager.playerOnTurn.name;
+        GameManager.turnCount++;
+    } else {
+        GameManager.playerOnTurn = GameManager.playerA;
+        playerTurnLabel.innerHTML = GameManager.playerOnTurn.name;
+        GameManager.turnCount++;
+    }
+
+    //cheking for ending of placing phase
+    if (GameManager.playerA.characters.length == 6 && GameManager.playerB.characters.length == 6) {
+        GameManager.gamePhase = 'Fighting';
+        GameManager.startGame();
+    }
+};
+
+GameManager.fightCharacter = () => {
+    if (GameManager.selectedAction != undefined) {
+        
+        var indexes = GameManager.getIndexesOfClickedField();
+        var chars = GameManager.playerOnTurn.characters;
+
+        for (var i = 0; i < chars.length; i++) {
+            if (chars[i].x == indexes[1] && chars[i].y == indexes[0]) {
+                Board.board[indexes[0]][indexes[1]].isSelected = true;
+                CanvasManager.display();
+            }
+        }
+    } else {
+        alert("Must select action first!");
+    }
+};
+
+GameManager.getIndexesOfClickedField = () => {
     var lpX = GameManager.lastPlayerX;
     var lpY = GameManager.lastPlayerY;
 
@@ -189,38 +264,37 @@ GameManager.addCharacterToGame = (player) => {
             var rightY = Board.board[i][j].y * 100 + Board.board[i][j].size;
 
             if ((lpX > leftX && lpX < rightX) && (lpY > leftY && lpY < rightY)) {
-                if (Board.board[i][j].side != player.name) {
-                    alert("This is not your side!");
-                    return;
-                }
+                return [i, j];
             }
         }
     }
-
-    //adding character to his player squad
-    GameManager.selectedCharacter.side = player.name;
-    player.characters.push(GameManager.selectedCharacter);
-
-    //changing the turn to other player
-    if (player.name == 'Player A') {
-        GameManager.playerOnTurn = 'Player B';
-        GameManager.turnCount++;
-    } else {
-        GameManager.playerOnTurn = 'Player A';
-        GameManager.turnCount++;
-    }
-};
+}
 
 GameManager.K = () => {
     var tempChar = Object.create(Knight);
     GameManager.selectedCharacter = tempChar;
+    CanvasManager.AllowedFieldsForPlacement(GameManager.playerOnTurn.name);
 };
 
 GameManager.E = () => {
     var tempChar = Object.create(Elf);
     GameManager.selectedCharacter = tempChar;
+    CanvasManager.AllowedFieldsForPlacement(GameManager.playerOnTurn.name);
 };
 GameManager.D = () => {
     var tempChar = Object.create(Dwarf);
     GameManager.selectedCharacter = tempChar;
+    CanvasManager.AllowedFieldsForPlacement(GameManager.playerOnTurn.name);
+};
+
+GameManager.attack = () => {
+    GameManager.selectedAction = 'attack';
+};
+
+GameManager.move = () => {
+    GameManager.selectedAction = 'move';
+};
+
+GameManager.heal = () => {
+    GameManager.selectedAction = 'heal';
 };

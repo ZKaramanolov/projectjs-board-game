@@ -13,3 +13,5 @@ Field.x = undefined;
 Field.y = undefined;
 
 Field.size = 100;
+
+Board.isSelected = false;

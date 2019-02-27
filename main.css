@@ -10,7 +10,7 @@
     margin: 1%;
     width: 900px;
     height: 700px;
-    border: solid 1px;
+    border: solid 5px;
 }
 
 #panel {
@@ -48,5 +48,6 @@
     padding: 10px;
     margin: 20px;
     background-color: grey;
+    color: white;
     cursor: pointer;
 }

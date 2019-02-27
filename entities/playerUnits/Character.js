@@ -13,3 +13,7 @@ Character.health = undefined;
 Character.attackRange = undefined;
 
 Character.speed = undefined;
+
+Character.x = undefined;
+
+Character.y = undefined;
