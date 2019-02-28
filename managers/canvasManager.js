@@ -19,24 +19,30 @@ CanvasManager.displayBoard = () => {
             var rendX = board[i][j].x * size;
             var rendY = board[i][j].y * size;
 
+            ctx.beginPath();
             ctx.strokeStyle = '#ffffff';
             ctx.fillStyle = board[i][j].color;
             ctx.fillRect(rendX, rendY, size, size);
             ctx.rect(rendX, rendY, size, size);
             ctx.stroke();
+            ctx.closePath();
 
+            //green
+            if (board[i][j].isVisited && board[i][j].isEmpty) {
+                ctx.fillStyle = '#4af99e';
+                ctx.beginPath();
+                ctx.arc(rendX + size / 2, rendY + size / 2, 40, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            //yellow
             if (board[i][j].isSelected) {
                 ctx.fillStyle = '#e7f94a';
                 ctx.beginPath();
                 ctx.arc(rendX + size / 2, rendY + size / 2, 40, 0, 2 * Math.PI);
                 ctx.fill();
-            }
-
-            if (board[i][j].isVisited) {
-                ctx.fillStyle = '#4af99e';
-                ctx.beginPath();
-                ctx.arc(rendX + size / 2, rendY + size / 2, 40, 0, 2 * Math.PI);
-                ctx.fill();
+                ctx.closePath();
             }
         }
     }

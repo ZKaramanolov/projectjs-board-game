@@ -24,6 +24,8 @@ GameManager.playerB = {
 
 GameManager.playerOnTurn = GameManager.playerA;
 
+GameManager.possibleMovementsFinish = false;
+
 GameManager.init = () => {
     GameManager.generateBoard();
     GameManager.generateRocks();
@@ -100,6 +102,7 @@ GameManager.generateRocks = () => {
         tempRock.y = Board.posibleRockPositions[randomPos][0];
 
         Board.rocks.push(tempRock);
+        Board.board[tempRock.y][tempRock.x].rock = true;
 
         Board.posibleRockPositions.splice(randomPos, 1);
     }
@@ -227,7 +230,7 @@ GameManager.addCharacterToGame = (player) => {
 };
 
 GameManager.fightCharacter = () => {
-    var action = GameManager.selectedAction
+    var action = GameManager.selectedAction;
 
     if (action != undefined) {
         var indexes = GameManager.getIndexesOfClickedField();
@@ -314,24 +317,44 @@ GameManager.attack = () => {
 };
 
 GameManager.move = () => {
-    GameManager.possibleMovements();
+    if (GameManager.possibleMovementsFinish) {
+        indexes = GameManager.getIndexesOfClickedField();
+
+        if (Board.board[indexes[0]][indexes[1]].isTested) {
+
+            Board.board[GameManager.selectedCharacter.y][GameManager.selectedCharacter.x].isEmpty = true;
+
+            Board.board[indexes[0]][indexes[1]].isEmpty = false;
+            GameManager.selectedCharacter.x = indexes[1];
+            GameManager.selectedCharacter.y = indexes[0];
+
+            GameManager.chengeTurns();
+        }
+
+        CanvasManager.display();
+        GameManager.clearSelected();
+    } else {
+        GameManager.possibleMovements();
+    }
 };
 
 GameManager.possibleMovements = () => {
+    //indexes of selected character
     var indexes = GameManager.getIndexesOfClickedField();
+    //speed/range that character can move
     var rangeOfMovement = GameManager.selectedCharacter.speed;
+
     var board = Board.board;
+
     var node = [];
 
     node.push(board[indexes[0]][indexes[1]]);
 
-    var enter = 1;
-
+    //marking all the fields that are posibble to move base on character range
     while (node.length > 0) {
         var temp = node.pop();
 
         temp.isVisited = true;
-        console.log(temp.dis);
 
         if (rangeOfMovement <= temp.dis) {
             continue;
@@ -385,8 +408,9 @@ GameManager.possibleMovements = () => {
             node.push(board[temp.y + 1][temp.x]);
             board[temp.y + 1][temp.x].isTested = true;
         }
-
     }
+    GameManager.possibleMovementsFinish = true;
+    GameManager.selectedCharacter.speed = rangeOfMovement;
     CanvasManager.display();
 };
 
@@ -408,16 +432,16 @@ GameManager.heal = () => {
 GameManager.clearSelected = () => {
     GameManager.selectedAction = undefined;
     GameManager.selectedCharacter = undefined;
+    GameManager.possibleMovementsFinish = false;
 
-   var indexes = GameManager.getIndexesOfClickedField();
-
-   Board.board[indexes[0]][indexes[1]].isSelected = false;
-
-    // for (var i = 0; i < Board.board.length; i++) {
-    //     for (var j = 0; j < Board.board[i].length; j++) {
-    //         Board.board[i][j].isSelected = false;
-    //     }
-    // }
+    for (var i = 0; i < Board.board.length; i++) {
+        for (var j = 0; j < Board.board[i].length; j++) {
+            Board.board[i][j].isTested = false;
+            Board.board[i][j].isVisited = false;
+            Board.board[i][j].isSelected = false;
+            Board.board[i][j].dis = 0;
+        }
+    }
 
     CanvasManager.display();
 };
