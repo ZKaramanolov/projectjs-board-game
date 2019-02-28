@@ -10,6 +10,8 @@ Elf.armor = 1;
 
 Elf.health = 10;
 
+Elf.fullHealth = 10;
+
 Elf.attackRange = 3;
 
 Elf.speed = 3;

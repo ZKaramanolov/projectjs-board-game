@@ -10,6 +10,8 @@ Dwarf.armor = 2;
 
 Dwarf.health = 12;
 
+Dwarf.fullHealth = 12;
+
 Dwarf.attackRange = 2;
 
 Dwarf.speed = 2;

@@ -22,4 +22,8 @@ Field.isVisited = false;
 
 Field.isTested = false;
 
+Field.readyForAttack = false;
+
+Field.controledBy = '';
+
 Field.dis = 0;

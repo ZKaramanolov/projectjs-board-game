@@ -10,6 +10,8 @@ Knight.armor = 3;
 
 Knight.health = 15;
 
+Knight.fullHealth = 15;
+
 Knight.attackRange = 1;
 
 Knight.speed = 1;

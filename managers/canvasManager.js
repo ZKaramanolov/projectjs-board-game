@@ -29,8 +29,8 @@ CanvasManager.displayBoard = () => {
 
             //green
             if (board[i][j].isVisited && board[i][j].isEmpty) {
-                ctx.fillStyle = '#4af99e';
                 ctx.beginPath();
+                ctx.fillStyle = '#4af99e';
                 ctx.arc(rendX + size / 2, rendY + size / 2, 40, 0, 2 * Math.PI);
                 ctx.fill();
                 ctx.closePath();
@@ -38,8 +38,17 @@ CanvasManager.displayBoard = () => {
 
             //yellow
             if (board[i][j].isSelected) {
-                ctx.fillStyle = '#e7f94a';
                 ctx.beginPath();
+                ctx.fillStyle = '#e7f94a';
+                ctx.arc(rendX + size / 2, rendY + size / 2, 40, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            //red
+            if (board[i][j].readyForAttack) {
+                ctx.beginPath();
+                ctx.fillStyle = '#ed4242';
                 ctx.arc(rendX + size / 2, rendY + size / 2, 40, 0, 2 * Math.PI);
                 ctx.fill();
                 ctx.closePath();
@@ -66,19 +75,36 @@ CanvasManager.displayCharacters = () => {
     var chars = GameManager.playerA.characters.concat(GameManager.playerB.characters);
 
     for (var i = 0; i < chars.length; i++) {
-        var rendX = chars[i].x * 100 + 50;
-        var rendY = chars[i].y * 100 + 50;
+        var rendX = chars[i].x * 100;
+        var rendY = chars[i].y * 100;
 
         if (chars[i].side == 'Player A') {
             ctx.fillStyle = "red";
         } else {
             ctx.fillStyle = "blue";
         }
+
+        ctx.beginPath();
         ctx.textAlign = "center";
         ctx.font = '23px Arial red';
-        ctx.fillText(chars[i].name, rendX, rendY);
-        //ctx.rect(rendX, rendY, board[i][j].size, board[i][j].size);
-        // ctx.stroke();
+        ctx.fillText(chars[i].name, rendX + 50, rendY + 50);
+        ctx.closePath();
+
+        var hWidth = (96 / chars[i].fullHealth) * chars[i].health;
+
+        ctx.beginPath();
+        ctx.strokeStyle = '#1c0101';
+        ctx.rect(rendX+3, rendY+3, 94, 4);
+        ctx.stroke();
+        ctx.closePath();
+
+        ctx.beginPath();
+        ctx.strokeStyle = '#f70c0c';
+        ctx.moveTo(rendX + 4, rendY + 5);
+        ctx.lineTo(rendX + hWidth, rendY + 5);
+        ctx.stroke();
+        ctx.closePath();
+
     }
 };
 
@@ -92,14 +118,21 @@ CanvasManager.AllowedFieldsForPlacement = (player) => {
             var rendY = board[i][j].y * board[i][j].size;
 
             if (board[i][j].side != player) {
+                ctx.beginPath();
                 ctx.fillStyle = '#db3204';
+                ctx.strokeStyle = '#ffffff';
                 ctx.fillRect(rendX, rendY, board[i][j].size, board[i][j].size);
                 ctx.rect(rendX, rendY, board[i][j].size, board[i][j].size);
+                ctx.stroke();
+                ctx.closePath();
+
+                ctx.beginPath;
                 ctx.fillStyle = 'black';
                 ctx.textAlign = "center";
-                ctx.font = '35px Arial red';
+                ctx.font = '35px Arial';
                 ctx.fillText('X', rendX + 50, rendY + 60);
                 ctx.stroke();
+                ctx.closePath();
             }
         }
     }
